@@ -1,5 +1,6 @@
 mod ex03;
+mod ex04;
 
 fn main() {
-    ex03::run();
+    ex04::run();
 }
