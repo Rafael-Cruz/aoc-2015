@@ -1,3 +1,5 @@
+#[allow(dead_code)]
+
 mod ex03;
 mod ex04;
 
