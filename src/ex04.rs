@@ -18,7 +18,7 @@ pub fn run() {
             break;
         }
 
-        if n % 10 == 0 {
+        if n % 10000 == 0 {
             println!("{}", n);
         }
         
@@ -33,7 +33,7 @@ fn generate_hash(n: u64) -> md5::Digest {
 fn verify_hash(hash: &md5::Digest) -> bool {
     hash[0] == 0 &&
     hash[1] == 0 &&
-    hash[2] < 16
+    hash[2] == 0
 }
 
 #[cfg(test)]
