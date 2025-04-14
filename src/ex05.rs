@@ -1,9 +1,6 @@
 use std::{
-    fs::File,
-    io::{BufRead, BufReader},
+    collections::HashMap, fs::File, io::{BufRead, BufReader}
 };
-
-const VOWELS: [char; 5] = ['a', 'e', 'i', 'o', 'u'];
 
 pub fn run() {
     let file = File::open("ex05_data.txt").expect("could not open file");
@@ -19,18 +16,28 @@ pub fn run() {
     println!("Nice strings: {}", result);
 }
 
-fn str_has_three_vowels(string: &str) -> bool {
-    string.chars()
-        .filter(|c| VOWELS.contains(c))
-        .collect::<Vec<char>>()
-        .len() >= 3
+fn str_has_double_letter(string: &str) -> bool {
+    let mut pairs: HashMap<String, (u32, usize)> = HashMap::new();
+
+    for (i, slice) in string.chars().collect::<Vec<_>>().windows(2).enumerate() {
+        pairs
+            .entry(String::from_iter(slice))
+            .and_modify(|value| {
+                if i > value.1 + 1 {
+                    value.0 = value.0 + 1;
+                }
+            })
+            .or_insert((1, i));
+    }
+
+    return pairs.iter().any(|(_, (count, _))| *count >= 2);
 }
 
-fn str_has_double_letter(string: &str) -> bool {
+fn str_has_triplet_letter(string: &str) -> bool {
     let mut result = false;
 
-    for slice in string.chars().collect::<Vec<_>>().windows(2) {
-        if slice[0] == slice[1] {
+    for slice in string.chars().collect::<Vec<_>>().windows(3) {
+        if slice[0] == slice[2] {
             result = true;
             break;
         }
@@ -39,48 +46,38 @@ fn str_has_double_letter(string: &str) -> bool {
     result
 }
 
-fn str_contain_forbidden_string(string: &str) -> bool {
-    string.contains("ab")
-    || string.contains("cd")
-    || string.contains("pq")
-    || string.contains("xy")
-}
-
 fn str_is_nice(string: &str) -> bool {
-    str_has_three_vowels(string)
-    && str_has_double_letter(string)
-    && !str_contain_forbidden_string(string)
+    str_has_double_letter(string) && str_has_triplet_letter(string)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn test_str_has_three_vowels() {
-        assert_eq!(str_has_three_vowels("ugknbfddgicrmopn"), true);
-        assert_eq!(str_has_three_vowels("aaa"), true);
-        assert_eq!(str_has_three_vowels("dvszwmarrgswjxmb"), false);
-    }
 
     #[test]
     fn test_str_has_double_letter() {
-        assert_eq!(str_has_double_letter("ugknbfddgicrmopn"), true);
-        assert_eq!(str_has_double_letter("aaa"), true);
-        assert_eq!(str_has_double_letter("jchzalrnumimnmhp"), false);
+        assert_eq!(str_has_double_letter("qjhvhtzxzqqjkmpb"), true);
+        assert_eq!(str_has_double_letter("xyxy"), true);
+        assert_eq!(str_has_double_letter("aabcdefgaa"), true);
+        assert_eq!(str_has_double_letter("xxyxx"), true);
+        assert_eq!(str_has_double_letter("aaa"), false);
     }
 
     #[test]
-    fn test_str_contain_forbidden_string() {
-        assert_eq!(str_contain_forbidden_string("haegwjzuvuyypxyu"), true);
-        assert_eq!(str_contain_forbidden_string("ugknbfddgicrmopn"), false);
+    fn test_str_has_triplet_letter() {
+        assert_eq!(str_has_triplet_letter("abcdefeghi"), true);
+        assert_eq!(str_has_triplet_letter("xyx"), true);
+        assert_eq!(str_has_triplet_letter("aaa"), true);
+        assert_eq!(str_has_triplet_letter("ieodomkazucvgmuy"), true);
+        assert_eq!(str_has_triplet_letter("uurcxstgmygtbstg"), false);
+        assert_eq!(str_has_triplet_letter("aabcdefgaa"), false);
     }
 
     #[test]
     fn test_str_is_nice() {
-        assert_eq!(str_is_nice("ugknbfddgicrmopn"), true);
-        assert_eq!(str_is_nice("aaa"), true);
-        assert_eq!(str_is_nice("jchzalrnumimnmhp"), false);
-        assert_eq!(str_is_nice("haegwjzuvuyypxyu"), false);
-        assert_eq!(str_is_nice("dvszwmarrgswjxmb"), false);
+        assert_eq!(str_is_nice("qjhvhtzxzqqjkmpb"), true);
+        assert_eq!(str_is_nice("xxyxx"), true);
+        assert_eq!(str_is_nice("uurcxstgmygtbstg"), false);
+        assert_eq!(str_is_nice("ieodomkazucvgmuy"), false);
     }
 }
